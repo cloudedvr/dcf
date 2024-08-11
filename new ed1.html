@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Four</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(7, 50px);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #start-game, #player-colors {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connect Four</h1>
+
+    <form id="player-colors">
+        Player 1 Color: <input type="text" id="player1-color" value="red">
+        Player 2 Color: <input type="text" id="player2-color" value="blue">
+        <button type="submit">Start Game</button>
+    </form>
+
+    <button id="start-game">Start Game</button>
+    
+    <div id="board"></div>
+
+    <script>
+        class Player {
+            constructor(color) {
+                this.color = color;
+            }
+        }
+
+        class Game {
+            constructor(height = 6, width = 7, player1Color = 'red', player2Color = 'blue') {
+                this.height = height;
+                this.width = width;
+                this.board = this.createBoard();
+                this.players = [new Player(player1Color), new Player(player2Color)];
+                this.currPlayer = this.players[0];
+                this.isGameOver = false;
+                this.renderBoard();
+            }
+
+            createBoard() {
+                return Array.from({ length: this.height }, () => Array(this.width).fill(null));
+            }
+
+            renderBoard() {
+                const boardDiv = document.getElementById('board');
+                boardDiv.innerHTML = ''; // Clear the board before rendering
+                for (let row = 0; row < this.height; row++) {
+                    for (let col = 0; col < this.width; col++) {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.className = 'cell';
+                        cellDiv.dataset.row = row;
+                        cellDiv.dataset.col = col;
+                        cellDiv.style.backgroundColor = this.board[row][col] ? this.board[row][col].color : 'lightgray';
+                        cellDiv.addEventListener('click', () => this.makeMove(col));
+                        boardDiv.appendChild(cellDiv);
+                    }
+                }
+            }
+
+            startGame() {
+                this.board = this.createBoard();
+                this.currPlayer = this.players[0];
+                this.isGameOver = false;
+                this.renderBoard();
+            }
+
+            makeMove(col) {
+                if (this.isGameOver) return;
+
+                for (let row = this.height - 1; row >= 0; row--) {
+                    if (!this.board[row][col]) {
+                        this.board[row][col] = this.currPlayer;
+                        this.renderBoard();
+                        if (this.checkForWin(row, col)) {
+                            alert(`Player ${this.currPlayer.color} wins!`);
+                            this.isGameOver = true;
+                        }
+                        this.currPlayer = this.currPlayer === this.players[0] ? this.players[1] : this.players[0];
+                        break;
+                    }
+                }
+            }
+
+            checkForWin(row, col) {
+                const directions = [
+                    { x: 0, y: 1 }, // vertical
+                    { x: 1, y: 0 }, // horizontal
+                    { x: 1, y: 1 }, // diagonal down-right
+                    { x: 1, y: -1 } // diagonal up-right
+                ];
+
+                const inBounds = (row, col) => row >= 0 && row < this.height && col >= 0 && col < this.width;
+
+                for (let { x, y } of directions) {
+                    let count = 1;
+
+                    for (let step = 1; step < 4; step++) {
+                        const nextRow = row + y * step;
+                        const nextCol = col + x * step;
+                        if (inBounds(nextRow, nextCol) && this.board[nextRow][nextCol] === this.currPlayer) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    for (let step = 1; step < 4; step++) {
+                        const prevRow = row - y * step;
+                        const prevCol = col - x * step;
+                        if (inBounds(prevRow, prevCol) && this.board[prevRow][prevCol] === this.currPlayer) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (count >= 4) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        let game;
+
+        document.getElementById('start-game').addEventListener('click', function() {
+            game.startGame();
+        });
+
+        document.getElementById('player-colors').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const player1Color = document.getElementById('player1-color').value;
+            const player2Color = document.getElementById('player2-color').value;
+            game = new Game(6, 7, player1Color, player2Color);
+            game.startGame();
+        });
+    </script>
+</body>
+</html>
