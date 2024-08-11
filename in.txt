@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Autofill Search Bar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            position: relative;
+            width: 300px;
+        }
+
+        #searchBar {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #suggestions {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            background-color: #fff;
+            z-index: 1000;
+        }
+
+        #suggestions.hidden {
+            display: none;
+        }
+
+        #suggestions li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #suggestions li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="text" id="searchBar" placeholder="Search fruit 🍎">
+        <ul id="suggestions" class="hidden"></ul>
+    </div>
+
+    <script>
+        const fruits = [
+            "Apple", "Apricot", "Avocado", "Banana", "Blackberry", "Blueberry",
+            "Cantaloupe", "Cherry", "Clementine", "Coconut", "Cranberry", "Date",
+            "Dragonfruit", "Durian", "Fig", "Grape", "Grapefruit", "Guava", "Kiwi",
+            "Lemon", "Lime", "Lychee", "Mango", "Nectarine", "Orange", "Papaya",
+            "Peach", "Pear", "Pineapple", "Plum", "Pomegranate", "Raspberry",
+            "Strawberry", "Watermelon"
+        ];
+
+        const searchBar = document.getElementById('searchBar');
+        const suggestions = document.getElementById('suggestions');
+
+        searchBar.addEventListener('keyup', () => {
+            const input = searchBar.value.toLowerCase();
+            const results = fruits.filter(fruit => fruit.toLowerCase().includes(input));
+            displaySuggestions(results);
+        });
+
+        function displaySuggestions(results) {
+            suggestions.innerHTML = '';
+            if (results.length > 0) {
+                results.forEach(result => {
+                    const li = document.createElement('li');
+                    li.textContent = result;
+                    li.addEventListener('click', () => {
+                        searchBar.value = result;
+                        suggestions.classList.add('hidden');
+                    });
+                    li.addEventListener('mouseover', () => {
+                        li.style.backgroundColor = '#f0f0f0';
+                    });
+                    li.addEventListener('mouseout', () => {
+                        li.style.backgroundColor = '#fff';
+                    });
+                    suggestions.appendChild(li);
+                });
+                suggestions.classList.remove('hidden');
+            } else {
+                suggestions.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
